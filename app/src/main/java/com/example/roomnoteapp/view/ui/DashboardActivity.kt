@@ -3,10 +3,14 @@ package com.example.roomnoteapp.view.ui
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.roomnoteapp.R
@@ -52,6 +56,27 @@ class DashboardActivity : AppCompatActivity() {
                 else Toast.makeText(this@DashboardActivity, "No Data", Toast.LENGTH_SHORT).show()
             }
         })
+
+        // dragDirs are 0 because we don't use drag and drop functionality
+        // we use swipe left or right
+        val itemTouchHelperCallback = object: ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT){
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                // what position in adapter the user swiped at
+                val position: Int = viewHolder.adapterPosition
+                noteViewModel.delete(viewAdapter.getNoteAt(position))
+                Toast.makeText(this@DashboardActivity, "Note deleted", Toast.LENGTH_SHORT).show()
+            }
+        }
+        val itemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
+        itemTouchHelper.attachToRecyclerView(recyclerView)
     }
 
     private val buttonAddNoteListener: View.OnClickListener = object: View.OnClickListener {
@@ -75,9 +100,24 @@ class DashboardActivity : AppCompatActivity() {
                 noteViewModel.insert(note)
 
                 Toast.makeText(this@DashboardActivity, "Note saved", Toast.LENGTH_SHORT).show()
-            }else{
-                Toast.makeText(this@DashboardActivity, "Note not saved", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val menuInflater: MenuInflater = menuInflater
+        menuInflater.inflate(R.menu.menu_dashboard, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.delete_all_notes -> {
+                noteViewModel.deleteAllNotes()
+                Toast.makeText(this@DashboardActivity, "All notes deleted", Toast.LENGTH_SHORT).show();
+                return true
+            }
+            else -> return super.onOptionsItemSelected(item)
         }
     }
 }
