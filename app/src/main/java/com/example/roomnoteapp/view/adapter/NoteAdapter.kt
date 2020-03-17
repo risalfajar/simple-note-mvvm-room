@@ -11,6 +11,7 @@ import com.example.roomnoteapp.service.model.Note
 class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
 
     private var notes: List<Note> = emptyList<Note>()
+    private var listener: OnItemClickListener? = null
 
     // Here where we create and return NoteHolder
     // This is the layout we want to use for the single items in our recyclerview
@@ -37,11 +38,27 @@ class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
         notifyDataSetChanged()
     }
 
-    fun getNoteAt(position: Int): Note = notes.get(position)
+    fun getNoteAt(position: Int): Note = notes[position]
 
     inner class NoteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val textViewTitle: TextView = itemView.findViewById(R.id.text_view_title)
         val textViewDescription: TextView = itemView.findViewById(R.id.text_view_description)
         val textViewPriority: TextView = itemView.findViewById(R.id.text_view_priority)
+
+        init {
+            itemView.setOnClickListener {
+                val position = adapterPosition
+                if(position != RecyclerView.NO_POSITION)
+                    listener?.onItemClick(getNoteAt(position))
+            }
+        }
+    }
+
+    interface OnItemClickListener{
+        fun onItemClick(note: Note)
+    }
+
+    fun setOnItemClickListener(listener: OnItemClickListener){
+        this.listener = listener
     }
 }

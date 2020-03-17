@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".view.ui.AddNoteActivity"
+            android:name=".view.ui.AddEditNoteActivity"
             android:parentActivityName=".view.ui.DashboardActivity" />
         <activity android:name=".view.ui.DashboardActivity"
             android:launchMode="singleTop">

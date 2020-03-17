@@ -26,20 +26,18 @@ class DashboardActivity : AppCompatActivity() {
     private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var viewAdapter: NoteAdapter
 
-    companion object{
-        val ADD_NOTE_REQUEST: Int = 1
+    companion object {
+        const val ADD_NOTE_REQUEST: Int = 1
+        const val EDIT_NOTE_REQUEST: Int = 2
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dashboard)
 
-        val buttonAddNote: FloatingActionButton = findViewById(R.id.button_add_note)
-        buttonAddNote.setOnClickListener(buttonAddNoteListener)
-
+        // set up RecyclerView
         viewManager = LinearLayoutManager(this)
         viewAdapter = NoteAdapter()
-
         recyclerView = findViewById<RecyclerView>(R.id.recycler_view).apply {
             layoutManager = viewManager
             adapter = viewAdapter
@@ -49,17 +47,25 @@ class DashboardActivity : AppCompatActivity() {
             setHasFixedSize(true)
         }
 
-        noteViewModel = ViewModelProvider.AndroidViewModelFactory(application).create(NoteViewModel::class.java)
-        noteViewModel.allNotes.observe(this, object: Observer<List<Note>> {
+        // set up FAB
+        val buttonAddNote: FloatingActionButton = findViewById(R.id.button_add_note)
+        buttonAddNote.setOnClickListener(buttonAddNoteListener)
+
+        // set up ViewModel
+        noteViewModel =
+            ViewModelProvider.AndroidViewModelFactory(application).create(NoteViewModel::class.java)
+        noteViewModel.allNotes.observe(this, object : Observer<List<Note>> {
             override fun onChanged(t: List<Note>?) {
-                if(t != null) viewAdapter.setNotes(t)
+                if (t != null) viewAdapter.setNotes(t)
                 else Toast.makeText(this@DashboardActivity, "No Data", Toast.LENGTH_SHORT).show()
             }
         })
 
+        // set up swipe behavior for note item
         // dragDirs are 0 because we don't use drag and drop functionality
         // we use swipe left or right
-        val itemTouchHelperCallback = object: ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT){
+        val itemTouchHelperCallback = object :
+            ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
             override fun onMove(
                 recyclerView: RecyclerView,
                 viewHolder: RecyclerView.ViewHolder,
@@ -77,29 +83,63 @@ class DashboardActivity : AppCompatActivity() {
         }
         val itemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
         itemTouchHelper.attachToRecyclerView(recyclerView)
+
+        // set up click behavior for note item
+        viewAdapter.setOnItemClickListener(onItemClickListener)
     }
 
-    private val buttonAddNoteListener: View.OnClickListener = object: View.OnClickListener {
+    private val buttonAddNoteListener: View.OnClickListener = object : View.OnClickListener {
         override fun onClick(v: View?) {
-            val intent: Intent = Intent(this@DashboardActivity, AddNoteActivity::class.java)
+            val intent: Intent = Intent(this@DashboardActivity, AddEditNoteActivity::class.java)
             startActivityForResult(intent, ADD_NOTE_REQUEST)
+        }
+    }
+
+    private val onItemClickListener = object : NoteAdapter.OnItemClickListener {
+        override fun onItemClick(note: Note) {
+            val intent = Intent(this@DashboardActivity, AddEditNoteActivity::class.java)
+            intent
+                .putExtra(AddEditNoteActivity.EXTRA_ID, note.id)
+                .putExtra(AddEditNoteActivity.EXTRA_TITLE, note.title)
+                .putExtra(AddEditNoteActivity.EXTRA_DESCRIPTION, note.description)
+                .putExtra(AddEditNoteActivity.EXTRA_PRIORITY, note.priority)
+            startActivityForResult(intent, EDIT_NOTE_REQUEST)
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if(requestCode == ADD_NOTE_REQUEST){
-            if(resultCode == RESULT_OK){
-                val title = data?.getStringExtra(AddNoteActivity.EXTRA_TITLE) ?: "No data"
-                val description = data?.getStringExtra(AddNoteActivity.EXTRA_DESCRIPTION) ?: "No data"
-                val priority = data?.getIntExtra(AddNoteActivity.EXTRA_PRIORITY, 1) ?: 1
+        if (requestCode == ADD_NOTE_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                val title = data?.getStringExtra(AddEditNoteActivity.EXTRA_TITLE) ?: "No data"
+                val description = data?.getStringExtra(AddEditNoteActivity.EXTRA_DESCRIPTION) ?: "No data"
+                val priority = data?.getIntExtra(AddEditNoteActivity.EXTRA_PRIORITY, 1) ?: 1
 
                 // insert data to database
                 val note = Note(title, description, priority)
                 noteViewModel.insert(note)
 
                 Toast.makeText(this@DashboardActivity, "Note saved", Toast.LENGTH_SHORT).show()
+            }
+        } else if (requestCode == EDIT_NOTE_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                val id = data?.getIntExtra(AddEditNoteActivity.EXTRA_ID, -1) ?: -1
+                if(id == -1){
+                    Toast.makeText(this@DashboardActivity, "Note can't be updated", Toast.LENGTH_SHORT).show()
+                    return
+                }
+
+                val title = data?.getStringExtra(AddEditNoteActivity.EXTRA_TITLE) ?: "No data"
+                val description = data?.getStringExtra(AddEditNoteActivity.EXTRA_DESCRIPTION) ?: "No data"
+                val priority = data?.getIntExtra(AddEditNoteActivity.EXTRA_PRIORITY, 1) ?: 1
+
+                // update data in database
+                val note = Note(title, description, priority).run {
+                    this.id = id
+                    this
+                }
+                noteViewModel.update(note)
             }
         }
     }
@@ -111,10 +151,11 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId){
+        when (item.itemId) {
             R.id.delete_all_notes -> {
                 noteViewModel.deleteAllNotes()
-                Toast.makeText(this@DashboardActivity, "All notes deleted", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this@DashboardActivity, "All notes deleted", Toast.LENGTH_SHORT)
+                    .show();
                 return true
             }
             else -> return super.onOptionsItemSelected(item)
