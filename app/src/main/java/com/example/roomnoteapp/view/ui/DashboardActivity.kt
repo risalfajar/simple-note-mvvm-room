@@ -51,15 +51,17 @@ class DashboardActivity : AppCompatActivity() {
         val buttonAddNote: FloatingActionButton = findViewById(R.id.button_add_note)
         buttonAddNote.setOnClickListener(buttonAddNoteListener)
 
-        // set up ViewModel
+        // set up ViewModel and observe note list data
         noteViewModel =
-            ViewModelProvider.AndroidViewModelFactory(application).create(NoteViewModel::class.java)
-        noteViewModel.allNotes.observe(this, object : Observer<List<Note>> {
-            override fun onChanged(t: List<Note>?) {
-                if (t != null) viewAdapter.setNotes(t)
-                else Toast.makeText(this@DashboardActivity, "No Data", Toast.LENGTH_SHORT).show()
+            ViewModelProvider.AndroidViewModelFactory(application).create(NoteViewModel::class.java).run {
+                allNotes.observe(this@DashboardActivity, object : Observer<List<Note>> {
+                    override fun onChanged(t: List<Note>?) {
+                        if (t != null) viewAdapter.submitList(t)
+                        else Toast.makeText(this@DashboardActivity, "No Data", Toast.LENGTH_SHORT).show()
+                    }
+                })
+                this
             }
-        })
 
         // set up swipe behavior for note item
         // dragDirs are 0 because we don't use drag and drop functionality
