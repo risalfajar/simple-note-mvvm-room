@@ -18,6 +18,7 @@ import com.example.roomnoteapp.service.model.Note
 import com.example.roomnoteapp.view.adapter.NoteAdapter
 import com.example.roomnoteapp.viewmodel.NoteViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.android.synthetic.main.activity_dashboard.*
 
 class DashboardActivity : AppCompatActivity() {
 
@@ -38,7 +39,7 @@ class DashboardActivity : AppCompatActivity() {
         // set up RecyclerView
         viewManager = LinearLayoutManager(this)
         viewAdapter = NoteAdapter()
-        recyclerView = findViewById<RecyclerView>(R.id.recycler_view).apply {
+        recycler_view.apply {
             layoutManager = viewManager
             adapter = viewAdapter
 
@@ -48,8 +49,7 @@ class DashboardActivity : AppCompatActivity() {
         }
 
         // set up FAB
-        val buttonAddNote: FloatingActionButton = findViewById(R.id.button_add_note)
-        buttonAddNote.setOnClickListener(buttonAddNoteListener)
+        button_add_note.setOnClickListener(buttonAddNoteListener)
 
         // set up ViewModel and observe note list data
         noteViewModel =

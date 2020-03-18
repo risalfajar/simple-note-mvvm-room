@@ -11,6 +11,7 @@ import android.widget.EditText
 import android.widget.NumberPicker
 import android.widget.Toast
 import com.example.roomnoteapp.R
+import kotlinx.android.synthetic.main.activity_add_note.*
 
 class AddEditNoteActivity : AppCompatActivity() {
 
@@ -21,18 +22,11 @@ class AddEditNoteActivity : AppCompatActivity() {
         const val EXTRA_ID: String = "com.example.roomnoteapp.view.ui.EXTRA_ID"
     }
 
-    private lateinit var editTextTitle: EditText
-    private lateinit var editTextDescription: EditText
-    private lateinit var numberPickerPriority: NumberPicker
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_note)
 
-        editTextTitle = findViewById(R.id.edit_text_title)
-        editTextDescription = findViewById(R.id.edit_text_description)
-        numberPickerPriority = findViewById(R.id.number_picker_priority)
-        numberPickerPriority.apply {
+        number_picker_priority.apply {
             minValue = 1
             maxValue = 10
         }
@@ -42,17 +36,17 @@ class AddEditNoteActivity : AppCompatActivity() {
         // handle intent for add or edit mode
         if(intent.hasExtra(EXTRA_ID)){ // edit mode
             title = "Edit note"
-            editTextTitle.setText(intent.getStringExtra(EXTRA_TITLE))
-            editTextDescription.setText(intent.getStringExtra(EXTRA_DESCRIPTION))
-            numberPickerPriority.value = intent.getIntExtra(EXTRA_PRIORITY, 1)
+            edit_text_title.setText(intent.getStringExtra(EXTRA_TITLE))
+            edit_text_description.setText(intent.getStringExtra(EXTRA_DESCRIPTION))
+            number_picker_priority.value = intent.getIntExtra(EXTRA_PRIORITY, 1)
         }
         else title = "Add note" // add mode
     }
 
     private fun saveNote(){
-        val title: String = editTextTitle.text.toString().trim()
-        val description: String = editTextDescription.text.toString().trim()
-        val priority: Int = numberPickerPriority.value
+        val title: String = edit_text_title.text.toString().trim()
+        val description: String = edit_text_description.text.toString().trim()
+        val priority: Int = number_picker_priority.value
 
         if(title.isEmpty() || description.isEmpty()){
             Toast.makeText(this@AddEditNoteActivity, "Pleas insert a title and description",

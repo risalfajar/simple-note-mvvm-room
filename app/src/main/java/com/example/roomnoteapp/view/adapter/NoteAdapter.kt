@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.roomnoteapp.R
 import com.example.roomnoteapp.service.model.Note
+import kotlinx.android.synthetic.main.item_note.view.*
 
 class NoteAdapter() : ListAdapter<Note, NoteAdapter.NoteViewHolder>(DIFF_CALLBACK) {
 
@@ -50,9 +51,9 @@ class NoteAdapter() : ListAdapter<Note, NoteAdapter.NoteViewHolder>(DIFF_CALLBAC
     fun getNoteAt(position: Int): Note = getItem(position)
 
     inner class NoteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val textViewTitle: TextView = itemView.findViewById(R.id.text_view_title)
-        val textViewDescription: TextView = itemView.findViewById(R.id.text_view_description)
-        val textViewPriority: TextView = itemView.findViewById(R.id.text_view_priority)
+        val textViewTitle: TextView = itemView.text_view_title
+        val textViewDescription: TextView = itemView.text_view_description
+        val textViewPriority: TextView = itemView.text_view_priority
 
         init {
             itemView.setOnClickListener {
