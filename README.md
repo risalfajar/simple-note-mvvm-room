@@ -17,6 +17,6 @@ Features that have been implemented:
 
 ----------
 ## Screenshots
-![Dashboard](../media/1.png?raw=true)
-![Edit Note](../media/2.png?raw=true)
-![Add Note](../media/3.png?raw=true)
+<img src="../media/1.png?raw=true" width="300" alt="Dashboard"/>
+<img src="../media/2.png?raw=true" width="300" alt="Edit note"/>
+<img src="../media/3.png?raw=true" width="300" alt="Add note"/>
